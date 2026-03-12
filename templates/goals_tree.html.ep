@@ -1,0 +1,97 @@
+% layout 'default';
+<section>
+  <div class="card">
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin:0;">目標ツリー</h2>
+      <div style="display:flex; gap:12px;">
+        <a class="muted" href="/tasks">タスク追加</a>
+        <a class="muted" href="/goals">一覧に戻る</a>
+      </div>
+    </div>
+% my $root = stash('goal_tree')->[0];
+% if ($root) {
+    <div class="tree">
+      <ul>
+        <li class="<%= $root->{completed} ? 'goal-done' : '' %>">
+          <div class="tree-node-item">
+            <div class="mindmap-node node-view">
+              <div class="node-head">
+                <strong><%= $root->{title} %></strong>
+              <div class="node-actions">
+                <form method="post" action="/goals/<%= $root->{id} %>/toggle_done" style="display:inline;">
+                  <input type="hidden" name="redirect" value="/goals/<%= $root->{id} %>">
+                  <button class="icon-btn" type="submit"><%= $root->{completed} ? '☑' : '☐' %></button>
+                </form>
+                <button class="icon-btn" type="button" data-open-add data-type="subgoal" data-goal-id="<%= $root->{id} %>" data-redirect="/goals/<%= $root->{id} %>">＋小</button>
+                <button class="icon-btn" type="button" data-open-add data-type="task" data-goal-id="<%= $root->{id} %>" data-redirect="/goals/<%= $root->{id} %>">＋</button>
+                <button class="icon-btn" type="button" data-edit-toggle>✎</button>
+                <button class="icon-btn danger" type="button" data-delete-goal data-goal-id="<%= $root->{id} %>" data-redirect="/goals/<%= $root->{id} %>">🗑</button>
+              </div>
+            </div>
+              <div class="muted">進捗 <%= $root->{progress} %>%</div>
+              <div class="muted">期限 <%= $root->{deadline} // '未設定' %></div>
+            </div>
+
+            <form class="mindmap-node node-edit" method="post" action="/goals/<%= $root->{id} %>/update">
+              <input type="hidden" name="redirect" value="/goals/<%= $root->{id} %>">
+              <input type="text" name="title" value="<%= $root->{title} %>" required>
+              <input type="date" name="deadline" value="<%= $root->{deadline} // '' %>">
+              <div class="node-actions">
+                <button class="icon-btn" type="submit">✓</button>
+                <button class="icon-btn" type="button" data-edit-cancel>✕</button>
+              </div>
+              <div class="muted">※ 子目標/タスクがある場合はアーカイブできません</div>
+            </form>
+
+          </div>
+          <%== include 'partials/goal_tree_lr', nodes => $root->{children} %>
+        </li>
+      </ul>
+    </div>
+% } else {
+    <div class="muted">目標がまだありません。</div>
+% }
+  </div>
+</section>
+
+<div class="modal-backdrop" id="delete-goal-modal">
+  <div class="modal">
+    <strong>目標を削除しますか？</strong>
+    <div class="muted" style="margin-top: 6px;">子目標やタスクがある場合は削除できません。</div>
+    <form method="post" id="delete-goal-form" style="margin-top: 8px;">
+      <input type="hidden" name="redirect" id="delete-goal-redirect" value="/goals/<%= stash('selected_goal_id') || '' %>">
+      <div class="modal-actions">
+        <button type="button" class="icon-btn" id="delete-goal-cancel">✕</button>
+        <button type="submit" class="icon-btn danger">🗑</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="add-item-modal">
+  <div class="modal">
+    <strong id="add-item-heading">追加</strong>
+    <form method="post" id="add-item-form" style="margin-top: 8px; display:grid; gap:8px;">
+      <input type="hidden" name="redirect" id="add-item-redirect" value="/goals/<%= stash('selected_goal_id') || '' %>">
+      <input type="hidden" name="goal_id" id="add-item-goal" value="<%= stash('selected_goal_id') || '' %>">
+      <input type="text" name="title" id="add-item-title" placeholder="名称" required>
+      <div id="add-item-task-fields" style="display:grid; gap:6px; grid-template-columns: 1fr 1fr 1fr;">
+        <input type="number" name="duration_min" id="add-item-duration" value="15" min="1" max="240">
+        <select name="priority" id="add-item-priority">
+          <option value="high">高</option>
+          <option value="medium" selected>中</option>
+          <option value="low">低</option>
+        </select>
+        <select name="repeat_type" id="add-item-repeat">
+          <option value="none">単発</option>
+          <option value="daily">毎日</option>
+          <option value="weekly">毎週</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="icon-btn" id="add-item-cancel">✕</button>
+        <button type="submit" class="icon-btn">✓</button>
+      </div>
+    </form>
+  </div>
+</div>

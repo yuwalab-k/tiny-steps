@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiny Steps</title>
+<script src="https://unpkg.com/htmx.org@1.9.3"></script>
+<style>
+  :root {
+    --ink: #1f2a3b;
+    --muted: #667085;
+    --bg: #f6f5f1;
+    --panel: #ffffff;
+    --soft: #eef2f6;
+    --mint: #cfeee4;
+    --peach: #ffe1c8;
+    --sky: #d9e8ff;
+    --sun: #ffe9a9;
+    --line: #e3e7ee;
+    --accent: #3a7f6b;
+    --accent-2: #e07a5f;
+    --branch-1: #5d8bcf;
+    --branch-2: #4aa37c;
+    --branch-3: #e09f3e;
+    --branch-4: #c96b7c;
+    --shadow: 0 12px 30px rgba(33, 50, 74, 0.08);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Manrope", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: radial-gradient(circle at top left, #fff4e7 0%, var(--bg) 40%, #f0f7f5 100%);
+  }
+
+  .app {
+    max-width: none;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 40px 40px;
+    display: grid;
+    gap: 24px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--mint), var(--sky));
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow);
+    font-size: 20px;
+  }
+
+  .brand h1 {
+    font-size: 22px;
+    margin: 0;
+  }
+
+  .nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav a {
+    text-decoration: none;
+  }
+
+  .nav a button {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .nav a.active button {
+    color: var(--ink);
+    background: var(--soft);
+    border-color: transparent;
+  }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 24px;
+  }
+
+  .card {
+    background: var(--panel);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .card h2 {
+    margin: 0 0 14px 0;
+    font-size: 20px;
+  }
+
+  .muted { color: var(--muted); }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--soft);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: #dfe6ee;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-bar span {
+    display: block;
+    height: 100%;
+    width: 62%;
+    background: linear-gradient(90deg, var(--accent), #55b398);
+    border-radius: inherit;
+  }
+
+  .task-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fbfcfe;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+  }
+
+  .task-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--accent);
+  }
+
+  .task.done .checkbox {
+    background: var(--accent);
+    box-shadow: inset 0 0 0 3px #fff;
+  }
+
+  .sticker {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--sun);
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .streak {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--peach);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+  }
+
+  .tree-preview {
+    display: grid;
+    gap: 14px;
+  }
+
+  .tree-node {
+    border-left: 2px solid var(--line);
+    padding-left: 12px;
+  }
+
+  .tree-node .node {
+    background: var(--soft);
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  .tree-node .leaf {
+    background: #fff;
+    border: 1px dashed var(--line);
+    padding: 6px 10px;
+    border-radius: 10px;
+    margin: 4px 0 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .goal-tree {
+    display: grid;
+    gap: 16px;
+  }
+
+  .goal-card {
+    padding: 14px 16px;
+    background: var(--panel);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+  }
+
+  .goal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .goal-branch {
+    display: grid;
+    gap: 8px;
+    padding-left: 16px;
+    border-left: 2px solid var(--line);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--mint);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+  }
+
+  .sticker-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+  }
+
+  .sticker-tile {
+    background: var(--panel);
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    height: 54px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+  }
+
+  .reward {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--soft);
+    border-radius: var(--radius-md);
+  }
+
+  .reward .progress-bar {
+    flex: 1;
+  }
+
+  .ai-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .ai-card {
+    border: 1px solid var(--line);
+    background: #fbfcfe;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    display: grid;
+    gap: 8px;
+  }
+
+  .ai-card button {
+    justify-self: start;
+    border: none;
+    background: var(--mint);
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .log-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .log-item {
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: #fbfcfe;
+    border: 1px solid var(--line);
+  }
+
+  .list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .list-table th, .list-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  .filter-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .filter-row input, .filter-row select {
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+  }
+
+  select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 14px) 50%, calc(100% - 8px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 28px;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .progress-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .tree {
+    overflow-x: auto;
+    padding: 8px 0 12px;
+  }
+
+  .tree.horizontal {
+    transform: rotate(-90deg);
+    transform-origin: top left;
+  }
+
+  .tree.horizontal .mindmap-node,
+  .tree.horizontal .node-edit,
+  .tree.horizontal .node-task {
+    transform: rotate(90deg);
+    transform-origin: center;
+  }
+
+  .tree ul {
+    position: relative;
+    padding: 16px 0 0;
+    margin: 0 auto;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .tree ul::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+
+  .tree li {
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+    list-style-type: none;
+    position: relative;
+    padding: 16px 10px 0 10px;
+    color: var(--branch-1);
+  }
+
+  .tree li::before,
+  .tree li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 50%;
+    border-top: 2px solid currentColor;
+    width: 50%;
+    height: 16px;
+  }
+
+  .tree li::after {
+    right: auto;
+    left: 50%;
+    border-left: 2px solid currentColor;
+  }
+
+  .tree li:only-child::after,
+  .tree li:only-child::before {
+    display: none;
+  }
+
+  .tree li:only-child { padding-top: 0; }
+
+  .tree li:first-child::before,
+  .tree li:last-child::after {
+    border: 0 none;
+  }
+
+  .tree li:last-child::before {
+    border-right: 2px solid currentColor;
+    border-radius: 0 12px 0 0;
+  }
+
+  .tree li:first-child::after {
+    border-radius: 12px 0 0 0;
+  }
+
+  .tree ul ul::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    border-left: 2px solid currentColor;
+    width: 0;
+    height: 16px;
+  }
+
+  .tree > ul > li { color: var(--branch-1); }
+  .tree > ul > li > ul > li { color: var(--branch-2); }
+  .tree > ul > li > ul > li > ul > li { color: var(--branch-3); }
+  .tree > ul > li > ul > li > ul > li > ul > li { color: var(--branch-4); }
+
+  .mindmap-node {
+    background: #fff;
+    border: 1px solid color-mix(in srgb, currentColor 35%, var(--line));
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: inline-grid;
+    gap: 4px;
+    min-width: 140px;
+    box-shadow: 0 10px 24px rgba(33, 50, 74, 0.08), 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  .goal-done .mindmap-node {
+    background: #f1f2f5;
+    color: #7a7f87;
+    box-shadow: none;
+  }
+
+  .goal-done .mindmap-task {
+    color: #8c919a;
+  }
+
+  .node-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .mindmap-task {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .tree-node-item {
+    display: inline-grid;
+    gap: 6px;
+    align-items: start;
+  }
+
+  .node-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .node-actions {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fff;
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    font-size: 14px;
+  }
+
+  .icon-btn.danger {
+    border-color: #f0c2c2;
+    color: #b55353;
+  }
+
+  .node-edit {
+    display: none;
+    gap: 6px;
+  }
+
+  .tree-node-item.editing .node-view {
+    display: none;
+  }
+
+  .tree-node-item.editing .node-edit {
+    display: grid;
+  }
+
+  .tree-node-item.tasking .node-task,
+  .tree-node-item.subgoaling .node-subgoal {
+    display: grid;
+  }
+
+  .task-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .task-edit {
+    display: none;
+    grid-column: 1 / -1;
+    gap: 6px;
+  }
+
+  .task-item.editing .task-view {
+    display: none;
+  }
+
+  .task-item.editing .task-edit {
+    display: grid;
+  }
+
+  .chat-row {
+    display: flex;
+    margin: 8px 0;
+  }
+
+  .chat-row.user {
+    justify-content: flex-end;
+  }
+
+  .chat-bubble {
+    max-width: 70%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #f3f6fb;
+    border: 1px solid var(--line);
+  }
+
+  .chat-row.user .chat-bubble {
+    background: #e7f5ef;
+    border-color: #cfe9dc;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    max-width: 420px;
+    width: 92%;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 14px;
+  }
+
+
+  @media (max-width: 980px) {
+    .dashboard, .section-grid { grid-template-columns: 1fr; }
+    .goal-row { grid-template-columns: 1fr; }
+    .sticker-board { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge">★</div>
+        <div>
+          <h1>Goal Tree</h1>
+          <div class="muted">今日の一歩を、積み上げる。</div>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="<%= stash('active') eq 'today' ? 'active' : '' %>" href="/today"><button>今日のやること</button></a>
+        <a class="<%= (stash('active') eq 'goals_list' || stash('active') eq 'goals_tree') ? 'active' : '' %>" href="/goals"><button>目標一覧</button></a>
+        <a class="<%= stash('active') eq 'tasks' ? 'active' : '' %>" href="/tasks"><button>タスク一覧</button></a>
+        <a class="<%= stash('active') eq 'stickers' ? 'active' : '' %>" href="/stickers"><button>シール帳</button></a>
+        <a class="<%= stash('active') eq 'ai' ? 'active' : '' %>" href="/ai"><button>AI相談</button></a>
+        <a class="<%= stash('active') eq 'lists' ? 'active' : '' %>" href="/lists"><button>一覧</button></a>
+        <a class="<%= stash('active') eq 'logs' ? 'active' : '' %>" href="/logs"><button>ログ</button></a>
+        <a class="<%= stash('active') eq 'progress' ? 'active' : '' %>" href="/progress"><button>達成度</button></a>
+      </div>
+    </div>
+
+    <%= content %>
+  </div>
+  <script>
+    function updateGoalActions() {
+      const select = document.getElementById('goal-select');
+      if (!select) return;
+      const goalId = select.value || '1';
+      const aiGoal = document.getElementById('ai-goal-id');
+      if (aiGoal) aiGoal.value = goalId;
+      document.querySelectorAll('form[data-goal-action]').forEach(form => {
+        const action = form.getAttribute('data-goal-action');
+        const url = `/goals/${goalId}/${action}`;
+        form.setAttribute('action', url);
+        form.setAttribute('hx-post', url);
+      });
+    }
+
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'goal-select') {
+        updateGoalActions();
+      }
+    });
+
+    document.addEventListener('htmx:afterSwap', (e) => {
+      if (e.target && e.target.id === 'ai-suggestions') {
+        updateGoalActions();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const toggle = e.target.closest('[data-edit-toggle]');
+      if (toggle) {
+        const node = toggle.closest('.tree-node-item');
+        if (node) node.classList.add('editing');
+      }
+      const cancel = e.target.closest('[data-edit-cancel]');
+      if (cancel) {
+        const node = cancel.closest('.tree-node-item');
+        if (node) node.classList.remove('editing');
+      }
+      const openAdd = e.target.closest('[data-open-add]');
+      if (openAdd) {
+        const modal = document.getElementById('add-item-modal');
+        const form = document.getElementById('add-item-form');
+        if (modal && form) {
+          const type = openAdd.getAttribute('data-type');
+          const goalId = openAdd.getAttribute('data-goal-id');
+          const redirect = openAdd.getAttribute('data-redirect') || '/goals';
+          const title = document.getElementById('add-item-title');
+          const dur = document.getElementById('add-item-duration');
+          const prio = document.getElementById('add-item-priority');
+          const repeat = document.getElementById('add-item-repeat');
+          const redirectInput = document.getElementById('add-item-redirect');
+          const goalInput = document.getElementById('add-item-goal');
+          const taskFields = document.getElementById('add-item-task-fields');
+          const heading = document.getElementById('add-item-heading');
+          if (goalInput) goalInput.value = goalId || '';
+          if (redirectInput) redirectInput.value = redirect;
+          if (title) title.value = '';
+          if (dur) dur.value = 15;
+          if (prio) prio.value = 'medium';
+          if (repeat) repeat.value = 'none';
+          if (taskFields) taskFields.style.display = type === 'task' ? 'grid' : 'none';
+          if (heading) heading.textContent = type === 'task' ? 'タスク追加' : '小目標追加';
+          form.setAttribute('action', type === 'task' ? `/goals/${goalId}/task` : `/goals/${goalId}/subgoal`);
+          modal.style.display = 'flex';
+        }
+      }
+      if (e.target && e.target.id === 'add-item-cancel') {
+        const modal = document.getElementById('add-item-modal');
+        if (modal) modal.style.display = 'none';
+      }
+
+      const taskEdit = e.target.closest('[data-task-edit-toggle]');
+      if (taskEdit) {
+        const item = taskEdit.closest('.task-item');
+        if (item) item.classList.add('editing');
+      }
+      const taskEditCancel = e.target.closest('[data-task-edit-cancel]');
+      if (taskEditCancel) {
+        const item = taskEditCancel.closest('.task-item');
+        if (item) item.classList.remove('editing');
+      }
+
+      const del = e.target.closest('[data-delete-goal]');
+      if (del) {
+        const modal = document.getElementById('delete-goal-modal');
+        const form = document.getElementById('delete-goal-form');
+        const redirect = document.getElementById('delete-goal-redirect');
+        if (modal && form) {
+          const goalId = del.getAttribute('data-goal-id');
+          const redir = del.getAttribute('data-redirect') || '/goals';
+          form.setAttribute('action', `/goals/${goalId}/archive`);
+          if (redirect) redirect.value = redir;
+          modal.style.display = 'flex';
+        }
+      }
+      const delTree = e.target.closest('[data-delete-goal-tree]');
+      if (delTree) {
+        const modal = document.getElementById('delete-goal-tree-modal');
+        const form = document.getElementById('delete-goal-tree-form');
+        const redirect = document.getElementById('delete-goal-tree-redirect');
+        if (modal && form) {
+          const goalId = delTree.getAttribute('data-goal-id');
+          const redir = delTree.getAttribute('data-redirect') || '/goals';
+          form.setAttribute('action', `/goals/${goalId}/archive_tree`);
+          if (redirect) redirect.value = redir;
+          modal.style.display = 'flex';
+        }
+      }
+      if (e.target && e.target.id === 'delete-goal-tree-cancel') {
+        const modal = document.getElementById('delete-goal-tree-modal');
+        if (modal) modal.style.display = 'none';
+      }
+      const addRoot = e.target.closest('[data-open-root-goal]');
+      if (addRoot) {
+        const modal = document.getElementById('add-root-goal-modal');
+        if (modal) modal.style.display = 'flex';
+      }
+      if (e.target && e.target.id === 'add-root-goal-cancel') {
+        const modal = document.getElementById('add-root-goal-modal');
+        if (modal) modal.style.display = 'none';
+      }
+      const addTask = e.target.closest('[data-open-task-modal]');
+      if (addTask) {
+        const modal = document.getElementById('add-task-modal');
+        if (modal) modal.style.display = 'flex';
+      }
+      if (e.target && e.target.id === 'add-task-cancel') {
+        const modal = document.getElementById('add-task-modal');
+        if (modal) modal.style.display = 'none';
+      }
+      if (e.target && e.target.id === 'delete-goal-cancel') {
+        const modal = document.getElementById('delete-goal-modal');
+        if (modal) modal.style.display = 'none';
+      }
+    });
+
+    updateGoalActions();
+  </script>
+</body>
+</html>

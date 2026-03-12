@@ -1,0 +1,24 @@
+% layout 'default';
+<section>
+  <div class="card">
+    <h2>AIタスク相談（チャット）</h2>
+    <div class="muted" style="margin-bottom: 10px;">モデル: qwen2.5:3b-instruct</div>
+    <div class="log-item" style="margin-bottom: 12px;">
+      <strong>追加先の目標を選択</strong>
+      <select id="goal-select" style="margin-top: 8px; width: 100%;">
+% for my $opt (@{ stash('goal_options') || [] }) {
+        <option value="<%= $opt->{id} %>"><%= $opt->{label} %></option>
+% }
+      </select>
+      <div class="muted" style="margin-top: 6px;">この目標の直下に小目標・タスクを追加します。</div>
+    </div>
+
+    <%== include 'partials/ai_chat', ai_messages => stash('ai_messages') %>
+
+    <form method="post" action="/ai/chat" hx-post="/ai/chat" hx-target="#ai-chat" hx-swap="outerHTML" style="margin-top: 12px; display: grid; gap: 8px;">
+      <input type="hidden" name="goal_id" id="ai-goal-id">
+      <input type="text" name="message" placeholder="例: 宇宙飛行士になりたい" required>
+      <button type="submit">送信</button>
+    </form>
+  </div>
+</section>

@@ -2,7 +2,8 @@ FROM perl:5.38
 
 WORKDIR /app
 
-RUN cpanm Mojolicious
+COPY cpanfile cpanfile
+RUN cpanm --notest --installdeps .
 
 COPY . .
 

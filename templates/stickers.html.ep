@@ -1,0 +1,41 @@
+% layout 'default';
+<section class="section-grid">
+  <div class="card">
+    <h2>シール帳</h2>
+    <div class="muted">今週の達成シール</div>
+    <div class="sticker-board" style="margin-top: 14px;">
+% for my $s (@{ stash('stickers')->{stickers} || [] }) {
+      <div class="sticker-tile"><%= $s->{digital_obtained} ? '⭐' : '☆' %></div>
+% }
+    </div>
+    <div class="reward">
+      <div>
+        <div class="muted">合計ポイント</div>
+        <strong><%= stash('stickers')->{total_points} %> ポイント</strong>
+      </div>
+      <div class="progress-bar"><span style="width: 40%;"></span></div>
+      <div class="sticker">🏅</div>
+    </div>
+    <div class="muted" style="margin-top: 10px;">連続 <%= stash('stickers')->{consecutive_days} %>日</div>
+  </div>
+
+  <div class="card">
+    <h2>物理シール管理</h2>
+    <div class="log-list">
+% for my $s (@{ stash('stickers')->{stickers} || [] }) {
+      <div class="log-item">
+        <strong><%= $s->{task} %></strong>
+        <div class="muted">デジタル: <%= $s->{digital_obtained} ? '獲得' : '未獲得' %> / 物理: <%= $s->{physical_obtained} ? '取得済' : '未取得' %> / 親チェック: <%= $s->{parent_checked} ? '済' : '未' %></div>
+        <div style="margin-top: 6px; display: flex; gap: 8px;">
+          <form method="post" action="/stickers/<%= $s->{task_id} %>/physical">
+            <button type="submit" <%= $s->{physical_obtained} ? 'disabled' : '' %>>物理シール取得</button>
+          </form>
+          <form method="post" action="/stickers/<%= $s->{task_id} %>/parent">
+            <button type="submit" <%= $s->{parent_checked} ? 'disabled' : '' %>>親チェック済み</button>
+          </form>
+        </div>
+      </div>
+% }
+    </div>
+  </div>
+</section>

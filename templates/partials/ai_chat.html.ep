@@ -1,0 +1,19 @@
+% my $messages = stash('ai_messages') || [];
+<div id="ai-chat">
+% for my $m (@$messages) {
+  <div class="chat-row <%= $m->{role} %>">
+    <div class="chat-bubble">
+      <div class="muted" style="font-size: 11px;"><%= $m->{role} %></div>
+      <div><%= $m->{content} %></div>
+    </div>
+  </div>
+% }
+% if (!@$messages) {
+  <div class="chat-row assistant">
+    <div class="chat-bubble">
+      <div class="muted" style="font-size: 11px;">assistant</div>
+      <div>目標を教えてください。そこからタスク分解します。</div>
+    </div>
+  </div>
+% }
+</div>

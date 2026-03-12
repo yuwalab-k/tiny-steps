@@ -1,0 +1,24 @@
+% my $list = stash('logs_filtered') || [];
+<div id="logs-filtered">
+  <table class="list-table">
+    <thead>
+      <tr>
+        <th>日時</th>
+        <th>操作</th>
+        <th>対象</th>
+      </tr>
+    </thead>
+    <tbody>
+% for my $log (@$list) {
+      <tr>
+        <td><%= $log->{timestamp} %></td>
+        <td><%= $log->{action} %></td>
+        <td><%= $log->{task} // '' %></td>
+      </tr>
+% }
+% if (!@$list) {
+      <tr><td colspan="3" class="muted">該当するログがありません。</td></tr>
+% }
+    </tbody>
+  </table>
+</div>

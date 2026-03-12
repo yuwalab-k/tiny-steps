@@ -1,0 +1,67 @@
+% my $list = stash('task_list') || [];
+% my %prio_label = (high => '高', medium => '中', low => '低');
+<div id="task-list-table">
+  <div class="muted" style="margin: 4px 0 6px;">未完了</div>
+  <table class="list-table">
+    <thead>
+      <tr>
+        <th>タスク</th>
+        <th>目標</th>
+        <th>優先度</th>
+        <th>所要</th>
+        <th>繰り返し</th>
+        <th>状態</th>
+      </tr>
+    </thead>
+    <tbody>
+% my $has_open = 0;
+% for my $t (@$list) {
+%   next if (($t->{last_status} // '') eq 'done');
+%   $has_open = 1;
+      <tr>
+        <td><%= $t->{title} %></td>
+        <td><%= $t->{goal_title} // '-' %></td>
+        <td><%= $prio_label{$t->{priority} // ''} // ($t->{priority} // '-') %></td>
+        <td><%= $t->{duration_min} %>分</td>
+        <td><%= $t->{repeat_type} %></td>
+        <td><%= $t->{active} ? '有効' : 'アーカイブ' %></td>
+      </tr>
+% }
+% if (!$has_open) {
+      <tr><td colspan="6" class="muted">未完了のタスクはありません。</td></tr>
+% }
+    </tbody>
+  </table>
+
+  <div class="muted" style="margin: 10px 0 6px;">完了</div>
+  <table class="list-table">
+    <thead>
+      <tr>
+        <th>タスク</th>
+        <th>目標</th>
+        <th>優先度</th>
+        <th>所要</th>
+        <th>繰り返し</th>
+        <th>状態</th>
+      </tr>
+    </thead>
+    <tbody>
+% my $has_done = 0;
+% for my $t (@$list) {
+%   next unless (($t->{last_status} // '') eq 'done');
+%   $has_done = 1;
+      <tr>
+        <td><%= $t->{title} %></td>
+        <td><%= $t->{goal_title} // '-' %></td>
+        <td><%= $prio_label{$t->{priority} // ''} // ($t->{priority} // '-') %></td>
+        <td><%= $t->{duration_min} %>分</td>
+        <td><%= $t->{repeat_type} %></td>
+        <td><%= $t->{active} ? '有効' : 'アーカイブ' %></td>
+      </tr>
+% }
+% if (!$has_done) {
+      <tr><td colspan="6" class="muted">完了したタスクはありません。</td></tr>
+% }
+    </tbody>
+  </table>
+</div>

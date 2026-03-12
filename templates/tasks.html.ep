@@ -1,0 +1,81 @@
+% layout 'default';
+<section class="section-grid">
+  <div class="card">
+    <h2>タスク追加</h2>
+    <button class="icon-btn" type="button" data-open-task-modal>＋</button>
+  </div>
+
+  <div class="card">
+    <h2>タスク一覧</h2>
+    <form hx-get="/partials/task_list_table" hx-target="#task-list-table" hx-swap="outerHTML">
+      <div class="filter-row">
+        <input type="text" name="q" placeholder="タスク名で検索">
+        <select name="priority">
+          <option value="all">優先度: すべて</option>
+          <option value="high">高</option>
+          <option value="medium">中</option>
+          <option value="low">低</option>
+        </select>
+        <select name="repeat">
+          <option value="all">繰り返し: すべて</option>
+          <option value="none">単発</option>
+          <option value="daily">毎日</option>
+          <option value="weekly">毎週</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <select name="sort">
+          <option value="created_at">作成日</option>
+          <option value="updated_at">更新日</option>
+          <option value="title">名前</option>
+          <option value="priority">優先度</option>
+          <option value="duration_min">所要時間</option>
+        </select>
+        <select name="dir">
+          <option value="desc">降順</option>
+          <option value="asc">昇順</option>
+        </select>
+        <label class="muted" style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" name="include_archived" value="1"> アーカイブ含む
+        </label>
+      </div>
+      <div class="filter-actions">
+        <button type="submit">検索</button>
+      </div>
+    </form>
+    <%== include 'partials/task_list_table', task_list => stash('task_list') %>
+  </div>
+</section>
+
+<div class="modal-backdrop" id="add-task-modal">
+  <div class="modal">
+    <strong>タスクを追加</strong>
+    <form method="post" action="/goals/<%= stash('goal_options')->[0]{id} // 1 %>/task" data-goal-action="task" style="margin-top: 8px; display:grid; gap:10px;">
+      <label class="muted">紐付ける目標</label>
+      <select id="goal-select" name="goal_id">
+% for my $opt (@{ stash('goal_options') || [] }) {
+        <option value="<%= $opt->{id} %>"><%= $opt->{label} %></option>
+% }
+      </select>
+      <input type="text" name="title" placeholder="タスク名" required>
+      <div style="display:grid; gap:8px; grid-template-columns: 1fr 1fr 1fr;">
+        <input type="number" name="duration_min" value="15" min="1" max="240">
+        <select name="priority">
+          <option value="high">高</option>
+          <option value="medium" selected>中</option>
+          <option value="low">低</option>
+        </select>
+        <select name="repeat_type">
+          <option value="none">単発</option>
+          <option value="daily">毎日</option>
+          <option value="weekly">毎週</option>
+        </select>
+      </div>
+      <input type="hidden" name="redirect" value="/tasks">
+      <div class="modal-actions">
+        <button type="button" class="icon-btn" id="add-task-cancel">✕</button>
+        <button type="submit" class="icon-btn">✓</button>
+      </div>
+    </form>
+  </div>
+</div>

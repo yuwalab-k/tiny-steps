@@ -1,0 +1,87 @@
+% layout 'default';
+<section class="section-grid">
+  <div class="card">
+    <h2>目標一覧</h2>
+    <div class="log-list">
+% for my $g (@{ stash('goal_list') || [] }) {
+      <a class="log-item" href="/goals?goal_id=<%= $g->{id} %>">
+        <strong><%= $g->{title} %></strong>
+        <div class="muted">期限 <%= $g->{deadline} // '未設定' %></div>
+      </a>
+% }
+% if (!(stash('goal_list') && @{ stash('goal_list') })) {
+      <div class="log-item muted">目標がまだありません。</div>
+% }
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>目標ツリー</h2>
+% my $root = stash('goal_tree')->[0];
+% if ($root) {
+    <div class="tree horizontal">
+      <ul>
+        <li class="<%= $root->{completed} ? 'goal-done' : '' %>">
+          <div class="tree-node-item">
+            <div class="mindmap-node node-view">
+              <div class="node-head">
+                <strong><%= $root->{title} %></strong>
+                <div class="node-actions">
+                  <form method="post" action="/goals/<%= $root->{id} %>/toggle_done" style="display:inline;">
+                    <input type="hidden" name="redirect" value="/goals?goal_id=<%= $root->{id} %>">
+                    <button class="icon-btn" type="submit"><%= $root->{completed} ? '☑' : '☐' %></button>
+                  </form>
+                  <button class="icon-btn" type="button" data-task-toggle>＋</button>
+                  <button class="icon-btn" type="button" data-edit-toggle>✎</button>
+                  <form method="post" action="/goals/<%= $root->{id} %>/archive" style="display:inline;">
+                    <input type="hidden" name="redirect" value="/goals?goal_id=<%= $root->{id} %>">
+                    <button class="icon-btn danger" type="submit">🗑</button>
+                  </form>
+                </div>
+              </div>
+              <div class="muted">進捗 <%= $root->{progress} %>%</div>
+              <div class="muted">期限 <%= $root->{deadline} // '未設定' %></div>
+            </div>
+
+            <form class="mindmap-node node-edit" method="post" action="/goals/<%= $root->{id} %>/update">
+              <input type="hidden" name="redirect" value="/goals?goal_id=<%= $root->{id} %>">
+              <input type="text" name="title" value="<%= $root->{title} %>" required>
+              <input type="date" name="deadline" value="<%= $root->{deadline} // '' %>">
+              <div class="node-actions">
+                <button class="icon-btn" type="submit">✓</button>
+                <button class="icon-btn" type="button" data-edit-cancel>✕</button>
+              </div>
+              <div class="muted">※ 子目標/タスクがある場合はアーカイブできません</div>
+            </form>
+
+            <form class="mindmap-node node-task" method="post" action="/goals/<%= $root->{id} %>/task">
+              <input type="hidden" name="redirect" value="/goals?goal_id=<%= $root->{id} %>">
+              <input type="text" name="title" placeholder="新しいタスク" required>
+              <div style="display:grid; gap:6px; grid-template-columns: 1fr 1fr 1fr;">
+                <input type="number" name="duration_min" value="15" min="1" max="240">
+                <select name="priority">
+                  <option value="high">高</option>
+                  <option value="medium" selected>中</option>
+                  <option value="low">低</option>
+                </select>
+                <select name="repeat_type">
+                  <option value="none">単発</option>
+                  <option value="daily">毎日</option>
+                  <option value="weekly">毎週</option>
+                </select>
+              </div>
+              <div class="node-actions">
+                <button class="icon-btn" type="submit">✓</button>
+                <button class="icon-btn" type="button" data-task-cancel>✕</button>
+              </div>
+            </form>
+          </div>
+          <%== include 'partials/goal_tree_lr', nodes => $root->{children} %>
+        </li>
+      </ul>
+    </div>
+% } else {
+    <div class="muted">目標がまだありません。</div>
+% }
+  </div>
+</section>
