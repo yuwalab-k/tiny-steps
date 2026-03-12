@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tiny Steps</title>
+<script src="https://unpkg.com/htmx.org@1.9.3"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2em; background: #f8f9fa; }
+  h1 { color: #333; }
+  .task { padding: 0.5em; margin: 0.5em 0; background: #fff; border-radius: 0.5em; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+  button { padding: 0.3em 0.6em; border-radius: 0.3em; border: none; background: #4CAF50; color: white; cursor: pointer;}
+  button:hover { background: #45a049; }
+</style>
+</head>
+<body>
+
+<h1>Tiny Steps</h1>
+<p>Small steps every day.</p>
+
+<div class="task">
+  Task example 1
+  <button hx-post="/task/complete/1" hx-swap="outerHTML">✅ 完了</button>
+</div>
+
+<div class="task">
+  Task example 2
+  <button hx-post="/task/complete/2" hx-swap="outerHTML">✅ 完了</button>
+</div>
+
+</body>
+</html>
