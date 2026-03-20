@@ -1,5 +1,0 @@
-<div class="goal-tree" id="goal-tree-cards">
-  <%== include 'partials/goal_tree_cards', nodes => stash('goal_tree'), level => 0 %>
-% my $root = stash('goal_tree')->[0];
-  <div class="badge">進捗 <%= $root ? $root->{progress} : 0 %>%</div>
-</div>

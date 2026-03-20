@@ -1,0 +1,65 @@
+% layout 'default';
+<div class="min-h-screen flex flex-col items-center gap-6 py-8 px-4">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-1 text-sm text-stone-400 flex-wrap justify-center max-w-xl">
+    <a href="/" class="hover:text-stone-700 transition text-base leading-none">⌂</a>
+    % for my $anc (@$ancestors) {
+      <span class="text-stone-300 select-none">/</span>
+      <a href="/mandala/<%= $anc->{id} %>"
+         class="hover:text-stone-700 transition max-w-[100px] truncate block">
+        <%= $anc->{title} %>
+      </a>
+    % }
+    <span class="text-stone-300 select-none">/</span>
+    <span class="text-stone-600 font-medium max-w-[140px] truncate block"><%= $node->{title} %></span>
+  </nav>
+
+  <!-- Mandala Grid -->
+  <div id="mandala-grid">
+    %= include 'partials/mandala_grid'
+  </div>
+
+  <p class="text-xs text-stone-400 select-none">
+    セルをクリックして掘り下げる &nbsp;·&nbsp; 空きマスに ＋ で追加
+  </p>
+
+</div>
+
+<script>
+function activateCell(el) {
+  if (el.dataset.active) return;
+  el.dataset.active = '1';
+  el.querySelector('.plus-view').classList.add('hidden');
+  const form = el.querySelector('.add-form');
+  form.classList.remove('hidden');
+  form.classList.add('flex');
+  const inp = form.querySelector('input[name=title]');
+  inp.focus();
+}
+
+function cancelCell(btn) {
+  const cell = btn.closest('[data-empty-cell]');
+  if (!cell) return;
+  delete cell.dataset.active;
+  cell.querySelector('.add-form').classList.add('hidden');
+  cell.querySelector('.add-form').classList.remove('flex');
+  cell.querySelector('.plus-view').classList.remove('hidden');
+}
+
+function startRename() {
+  document.getElementById('center-view').classList.add('hidden');
+  const form = document.getElementById('rename-form');
+  form.classList.remove('hidden');
+  form.classList.add('flex');
+  const inp = form.querySelector('input');
+  inp.focus();
+  inp.select();
+}
+
+function cancelRename() {
+  document.getElementById('rename-form').classList.add('hidden');
+  document.getElementById('rename-form').classList.remove('flex');
+  document.getElementById('center-view').classList.remove('hidden');
+}
+</script>

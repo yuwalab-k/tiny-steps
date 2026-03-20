@@ -1,0 +1,36 @@
+% layout 'default';
+<div class="min-h-screen flex flex-col items-center justify-center gap-10 p-6">
+
+  <div class="text-center space-y-1">
+    <h1 class="text-3xl font-light tracking-widest text-stone-700">Mandala</h1>
+    <p class="text-sm text-stone-400">目標を9マスで考える</p>
+  </div>
+
+  % if (@$roots) {
+  <div class="grid gap-3 w-full max-w-xs">
+    % for my $root (@$roots) {
+    <a href="/mandala/<%= $root->{id} %>"
+       class="block p-4 bg-white rounded-2xl shadow-sm border border-stone-200
+              hover:border-indigo-300 hover:shadow-md transition text-center
+              font-medium text-stone-700">
+      <%= $root->{title} %>
+    </a>
+    % }
+  </div>
+  % }
+
+  <div class="w-full max-w-xs space-y-2">
+    <p class="text-xs text-stone-400 text-center">新しいチャートを作成</p>
+    <form method="post" action="/goals" class="flex gap-2">
+      <input type="text" name="title" placeholder="目標を入力" required
+             class="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 bg-white
+                    outline-none focus:border-indigo-400 text-sm">
+      <button type="submit"
+              class="px-5 py-2.5 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600
+                     transition text-sm font-medium">
+        作成
+      </button>
+    </form>
+  </div>
+
+</div>
