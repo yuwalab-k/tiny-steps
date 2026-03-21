@@ -55,15 +55,21 @@ helper fetch_node => sub {
 };
 
 helper fetch_children => sub {
-  my ($c, $parent_id) = @_;
-  my $sql = defined $parent_id
-    ? q{SELECT g.*, (SELECT COUNT(*) FROM goals WHERE parent_id = g.id AND archived = 0) AS child_count
-        FROM goals g WHERE g.parent_id = ? AND g.archived = 0 ORDER BY g.sort_order, g.id}
-    : q{SELECT g.*, (SELECT COUNT(*) FROM goals WHERE parent_id = g.id AND archived = 0) AS child_count
-        FROM goals g WHERE g.parent_id IS NULL AND g.archived = 0 ORDER BY g.sort_order, g.id};
-  defined $parent_id
-    ? $c->db->selectall_arrayref($sql, { Slice => {} }, $parent_id)
-    : $c->db->selectall_arrayref($sql, { Slice => {} });
+  my ($c, $parent_id, %opt) = @_;
+  my (@cond, @bind);
+  if (defined $parent_id) {
+    push @cond, 'g.parent_id = ?'; push @bind, $parent_id;
+  } else {
+    push @cond, 'g.parent_id IS NULL';
+  }
+  if (exists $opt{completed}) {
+    push @cond, 'g.completed = ?'; push @bind, $opt{completed};
+  }
+  push @cond, 'g.archived = 0';
+  my $where = join(' AND ', @cond);
+  my $sql = qq{SELECT g.*, (SELECT COUNT(*) FROM goals WHERE parent_id = g.id AND archived = 0) AS child_count
+    FROM goals g WHERE $where ORDER BY g.sort_order, g.id};
+  $c->db->selectall_arrayref($sql, { Slice => {} }, @bind);
 };
 
 helper fetch_ancestors => sub {
@@ -82,10 +88,17 @@ helper fetch_ancestors => sub {
 get '/' => sub {
   my $c = shift;
   $c->ensure_db;
-  my $roots = $c->fetch_children(undef);
-  return $c->redirect_to('/mandala/' . $roots->[0]{id}) if @$roots == 1;
+  my $roots = $c->fetch_children(undef, completed => 0);
   $c->stash(roots => $roots);
   $c->render(template => 'home');
+};
+
+get '/archive' => sub {
+  my $c = shift;
+  $c->ensure_db;
+  my $charts = $c->fetch_children(undef, completed => 1);
+  $c->stash(charts => $charts);
+  $c->render(template => 'archive');
 };
 
 get '/mandala/:id' => sub {
@@ -128,12 +141,19 @@ post '/goals/:id/child' => sub {
   my $title = $c->param('title') // '';
   $title =~ s/^\s+|\s+$//g;
 
+  my $slot = $c->param('slot') // -1;
+  $slot = int($slot);
+  $slot = -1 if $slot < 0 || $slot > 7;
+
   if ($title ne '') {
     my $kids = $c->fetch_children($pid);
     if (@$kids < 8) {
+      # slot が指定されていてそのスロットが空なら指定位置に、そうでなければ末尾
+      my %taken = map { $_->{sort_order} => 1 } @$kids;
+      my $order = ($slot >= 0 && !$taken{$slot}) ? $slot : scalar(@$kids);
       $c->db->do(
         "INSERT INTO goals (parent_id, title, sort_order) VALUES (?, ?, ?)",
-        undef, $pid, $title, scalar(@$kids)
+        undef, $pid, $title, $order
       );
     }
   }

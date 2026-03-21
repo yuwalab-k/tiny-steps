@@ -20,7 +20,6 @@
   % }
 
   <div class="w-full max-w-xs space-y-2">
-    <p class="text-xs text-stone-400 text-center">新しいチャートを作成</p>
     <form method="post" action="/goals" class="flex gap-2">
       <input type="text" name="title" placeholder="目標を入力" required
              class="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 bg-white
@@ -32,5 +31,11 @@
       </button>
     </form>
   </div>
+
+  <a href="/archive"
+     class="flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600 transition">
+    <span class="material-icons" style="font-size:15px">inventory_2</span>
+    完了済み
+  </a>
 
 </div>

@@ -3,7 +3,9 @@
 
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-1 text-sm text-stone-400 flex-wrap justify-center max-w-xl">
-    <a href="/" class="hover:text-stone-700 transition text-base leading-none">⌂</a>
+    <a href="/" class="hover:text-stone-700 transition leading-none">
+      <span class="material-icons" style="font-size:18px;vertical-align:middle">home</span>
+    </a>
     % for my $anc (@$ancestors) {
       <span class="text-stone-300 select-none">/</span>
       <a href="/mandala/<%= $anc->{id} %>"
@@ -19,10 +21,6 @@
   <div id="mandala-grid">
     %= include 'partials/mandala_grid'
   </div>
-
-  <p class="text-xs text-stone-400 select-none">
-    セルをクリックして掘り下げる &nbsp;·&nbsp; 空きマスに ＋ で追加
-  </p>
 
 </div>
 

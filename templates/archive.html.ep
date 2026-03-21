@@ -1,0 +1,28 @@
+% layout 'default';
+<div class="min-h-screen flex flex-col items-center justify-center gap-10 p-6">
+
+  <div class="text-center space-y-1">
+    <h1 class="text-3xl font-light tracking-widest text-stone-700">完了済み</h1>
+    <p class="text-sm text-stone-400">達成したチャート</p>
+  </div>
+
+  % if (@$charts) {
+  <div class="grid gap-3 w-full max-w-xs">
+    % for my $chart (@$charts) {
+    <a href="/mandala/<%= $chart->{id} %>"
+       class="block p-4 bg-white rounded-2xl shadow-sm border border-emerald-200
+              hover:border-emerald-400 hover:shadow-md transition text-center
+              font-medium text-stone-500">
+      <%= $chart->{title} %>
+    </a>
+    % }
+  </div>
+  % }
+
+  <a href="/"
+     class="flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600 transition">
+    <span class="material-icons" style="font-size:15px">arrow_back</span>
+    ホームに戻る
+  </a>
+
+</div>
